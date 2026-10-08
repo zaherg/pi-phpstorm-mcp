@@ -7,7 +7,7 @@ export default function phpstormMcp(pi: ExtensionAPI) {
 	pi.on("session_start", (_event, ctx) => {
 		if (ctx.mode !== "rpc") return;
 
-		const configPath = join(homedir(), ".pi", "agent", "pi-jetbrains-mcp.json");
+		const configPath = join(homedir(), ".pi", "agent", "pi-phpstorm-mcp.json");
 		let config = {
 			type: "stdio" as const,
 			env: { IJ_MCP_SERVER_PORT: "64442" },

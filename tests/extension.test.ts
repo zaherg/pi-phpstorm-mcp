@@ -3,15 +3,25 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import test, { beforeEach } from "node:test";
 import { fileURLToPath } from "node:url";
+import type {
+	ExtensionAPI,
+	ExtensionContext,
+	ExtensionHandler,
+	McpServerConfig,
+	SessionStartEvent,
+} from "@earendil-works/pi-coding-agent";
 import phpstormMcp from "../index.ts";
 
-let configPath;
+type SessionStartHandler = ExtensionHandler<SessionStartEvent>;
+
+let configPath: string;
 
 beforeEach((t) => {
+	assert.ok("after" in t);
 	const home = mkdtempSync(fileURLToPath(new URL(".home-", import.meta.url)));
 	const previousHome = process.env.HOME;
 	process.env.HOME = home;
-	configPath = join(home, ".pi", "agent", "pi-jetbrains-mcp.json");
+	configPath = join(home, ".pi", "agent", "pi-phpstorm-mcp.json");
 	mkdirSync(join(home, ".pi", "agent"), { recursive: true });
 	t.after(() => {
 		if (previousHome === undefined) delete process.env.HOME;
@@ -21,25 +31,31 @@ beforeEach((t) => {
 });
 
 function loadExtension() {
-	const handlers = new Map();
-	const registrations = [];
+	const handlers = new Map<string, SessionStartHandler[]>();
+	const registrations: { name: string; config: McpServerConfig }[] = [];
 
-	phpstormMcp({
+	// Only the Pi API members used by this extension are needed in the fixture.
+	const pi: Pick<ExtensionAPI, "on" | "registerMcpServer"> = {
 		on(event, handler) {
+			assert.equal(event, "session_start");
 			const callbacks = handlers.get(event) ?? [];
-			callbacks.push(handler);
+			callbacks.push(handler as SessionStartHandler);
 			handlers.set(event, callbacks);
+			return () => {
+				handlers.set(event, callbacks.filter((callback) => callback !== handler));
+			};
 		},
 		registerMcpServer(name, config) {
 			registrations.push({ name, config });
 		},
-	});
+	};
+	phpstormMcp(pi as ExtensionAPI);
 
 	return {
 		registrations,
-		async startSession(mode) {
+		async startSession(mode: ExtensionContext["mode"]) {
 			for (const handler of handlers.get("session_start") ?? []) {
-				await handler({ type: "session_start" }, { mode });
+				await handler({ type: "session_start", reason: "startup" }, { mode } as ExtensionContext);
 			}
 		},
 	};
@@ -104,7 +120,8 @@ for (const scenario of ["malformed", "unreadable"]) {
 		if (scenario === "unreadable") mkdirSync(configPath);
 		const extension = loadExtension();
 
-		await assert.rejects(extension.startSession("rpc"), (error) => {
+		await assert.rejects(extension.startSession("rpc"), (error: unknown) => {
+			assert.ok(error instanceof Error);
 			assert.ok(error.message.includes(configPath));
 			return true;
 		});
@@ -112,7 +129,7 @@ for (const scenario of ["malformed", "unreadable"]) {
 	});
 }
 
-for (const mode of ["tui", "print", "json"]) {
+for (const mode of ["tui", "print", "json"] as const) {
 	test(`does not read config or register PhpStorm in ${mode} mode`, async () => {
 		writeFileSync(configPath, "{ invalid json");
 		const extension = loadExtension();

@@ -58,7 +58,7 @@ Use `pi remove "$PWD"` from the same directory to remove a local installation.
 
 ## Server configuration
 
-The extension reads `~/.pi/agent/pi-jetbrains-mcp.json` at the start of each RPC session and registers it as `phpstorm`.
+The extension reads `~/.pi/agent/pi-phpstorm-mcp.json` at the start of each RPC session and registers it as `phpstorm`.
 The file contains one MCP server configuration object, without an `mcpServers` wrapper.
 If the file does not exist, the extension uses these defaults:
 
@@ -75,7 +75,7 @@ If the file does not exist, the extension uses these defaults:
 
 These defaults are specific to the original macOS installation, including the username, application location, and MCP port.
 For another installation, use the executable path, arguments, and port supplied by PhpStorm's MCP settings.
-To change the settings, create `~/.pi/agent/pi-jetbrains-mcp.json` with the JSON object shown here and edit its values.
+To change the settings, create `~/.pi/agent/pi-phpstorm-mcp.json` with the JSON object shown here and edit its values.
 An existing file replaces the defaults rather than merging with them.
 Restart the Pi ACP session after changing the file.
 The extension does not create the file automatically.
