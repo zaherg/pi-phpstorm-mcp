@@ -1,0 +1,21 @@
+{
+  "review": "structured self-review",
+  "scope": "/Users/zaher/.pi/agent/mcp.json",
+  "findings": [],
+  "checks": {
+    "jsonValid": true,
+    "onlyCamofoxLaunchArgumentChanged": true,
+    "sharedConfigMatches": true,
+    "terminalMcpToolCount": 11,
+    "jetBrainsRuntimeMcpToolCount": 11
+  },
+  "verificationMethod": "Direct MCP initialization and tools/list using the saved configuration; no browser or MCP tool calls.",
+  "notApplicable": [
+    "Build and type checks: configuration-only change."
+  ],
+  "limitations": [
+    "The existing ACP session must be restarted or replaced to reload the configuration.",
+    "Browser launch was not tested; no localhost:9377 listener was observed."
+  ],
+  "acceptedTradeoff": "The fixed path contains Node v26.10.0 and must be revisited when that Node installation is removed or global packages are migrated."
+}

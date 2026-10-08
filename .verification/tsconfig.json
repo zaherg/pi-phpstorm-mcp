@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@earendil-works/pi-coding-agent": [
+        "/Users/zaher/.nvm/versions/node/v26.10.0/lib/node_modules/@earendil-works/pi-coding-agent/dist/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "../index.ts"
+  ]
+}
